@@ -1,5 +1,7 @@
 version: "3.8"
+
 services:
+  
   mysql:
     image: mysql:8.0
     container_name: mysql_db
@@ -12,4 +14,19 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     ports:
-      - "3308:3306"
+      - "3308:3306"  
+
+  nestjs-app:
+    build: .
+    container_name: nestjs_app
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    depends_on:
+      - mysql
