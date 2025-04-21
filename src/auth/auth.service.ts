@@ -5,6 +5,7 @@ import * as bcryptjs from 'bcryptjs'
 import { hash } from 'crypto';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from './enums/rol.enum';
 
 
 @Injectable()
@@ -21,11 +22,16 @@ export class AuthService {
         if(user){
            throw new BadRequestException('ya existe un usuario con ese nombre');
         }
-       return await this.usersService.create({
+        await this.usersService.create({
         name,
         email,
         password: await bcryptjs.hash(password,10)
        });
+
+       return{
+        name,
+        email
+       }
         
     }
 
@@ -41,7 +47,7 @@ export class AuthService {
         throw new UnauthorizedException('password is wrong');
         }
 
-        const payload= {email: user.email}
+        const payload= {email: user.email,role:user.role}
 
         const token = await this.jwtService.signAsync(payload);
 
@@ -51,4 +57,18 @@ export class AuthService {
             email,
         };
     }
+
+    async profile({ email }: { email: string }) {
+        const user = await this.usersService.findOneByEmail(email);
+      
+        if (!user) {
+          throw new UnauthorizedException('Usuario no encontrado');
+        }
+      
+        const { password, ...safeUser } = user;
+        return safeUser;
+      }
+      
+
+
 }
